@@ -15,7 +15,11 @@ namespace Mono_Topic_2___Lists_and_Loops
         Rectangle window;
         Texture2D spaceBackgroundTexture;
         List<Texture2D> textures;
+        List<Texture2D> planetTextures;
         List<Rectangle> planetRects;
+        float seconds;
+        float respawnTime;
+        MouseState mouseState;
 
         public Game1()
         {
@@ -32,15 +36,9 @@ namespace Mono_Topic_2___Lists_and_Loops
             generator = new Random();
             textures = new List<Texture2D>();
             planetRects = new List<Rectangle>();
-
-            for (int i = 0; i < 30; i++)
-            {
-                planetRects.Add
-                (
-                    new Rectangle(generator.Next(window.Width - 25), generator.Next(window.Height - 25), 25, 25)
-                );
-            }
-
+            planetTextures = new List<Texture2D>();
+            seconds = 0f;
+            respawnTime = 3f;
 
             base.Initialize();
         }
@@ -65,6 +63,29 @@ namespace Mono_Topic_2___Lists_and_Loops
                 Exit();
 
             // TODO: Add your update logic here
+            mouseState = Mouse.GetState();
+            seconds += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (seconds > respawnTime)
+            {
+                planetTextures.Add(textures[generator.Next(textures.Count)]);
+                planetRects.Add
+               (
+                   new Rectangle(generator.Next(window.Width - 25), generator.Next(window.Height - 25), 25, 25)
+               );
+                seconds = 0f;
+            }
+            if (mouseState.LeftButton == ButtonState.Pressed)
+            {
+                for (int i = 0; i < planetRects.Count; i++)
+                {
+                    if (planetRects[i].Contains(mouseState.Position))
+                    {
+                        planetRects.RemoveAt(i);
+                        planetTextures.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
 
             base.Update(gameTime);
         }
@@ -78,7 +99,7 @@ namespace Mono_Topic_2___Lists_and_Loops
             _spriteBatch.Draw(spaceBackgroundTexture, window, Color.White);
             for (int i = 0; i < planetRects.Count; i++)
             {
-                _spriteBatch.Draw(textures[0], planetRects[i], Color.White);
+                _spriteBatch.Draw(planetTextures[i], planetRects[i], Color.White);
             }
             _spriteBatch.End();
 
